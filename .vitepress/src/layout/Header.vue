@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { useRouter } from 'vitepress';
+import { computed } from 'vue';
 
 const router = useRouter()
-
 </script>
 <template>
   <header class="flex flex-row items-center pl-10">

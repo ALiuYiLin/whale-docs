@@ -4,13 +4,27 @@ import Footer from './Footer.vue'
 import Siderbar from '@/components/Siderbar.vue'
 import { useLayout } from '@/router'
 import { useSiderBar } from '@/composables/use-siderbar'
+import { computed, onMounted } from 'vue'
 const { currentView } = useLayout()
 const { currentSiderbarItem } = useSiderBar()
+const hasParent = computed(()=> !!parent)
+
+onMounted(() => {
+  const htmlElement = document.documentElement;
+      console.log('htmlElement: ', htmlElement);
+      console.log('htmlElement.scrollHeight: ', htmlElement.scrollHeight);
+      console.log('htmlElement.offsetHeight: ', htmlElement.offsetHeight);
+      console.log('htmlElement.clientHeight: ', htmlElement.clientHeight);
+  parent.postMessage({
+    height: document.documentElement.scrollHeight,
+    width: document.documentElement.scrollWidth,
+  }, 'http://localhost:3000')
+})
 </script>
 
 <template>
   <div class="layout relative">
-    <Header></Header>
+    <Header v-if="!hasParent"></Header>
     <main>
       <Siderbar></Siderbar>
       <div class="main-content">
