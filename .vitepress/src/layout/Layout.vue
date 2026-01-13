@@ -4,10 +4,12 @@ import Footer from './Footer.vue'
 import Siderbar from '@/components/Siderbar.vue'
 import { useLayout } from '@/router'
 import { useSiderBar } from '@/composables/use-siderbar'
-import { computed, onMounted, nextTick,onBeforeUnmount  } from 'vue'
+import { computed, onMounted, nextTick,onBeforeUnmount, onUpdated, watch, ref  } from 'vue'
 const { currentView } = useLayout()
 const { currentSiderbarItem } = useSiderBar()
 const inIframe = computed(()=> window.self !== window.top)
+let lastAppHeight = ref(appCalcHeight())
+console.log('lastAppHeight: ', lastAppHeight.value);
 
 
 function calcHeight() {
@@ -15,10 +17,16 @@ function calcHeight() {
   const body = document.body
   return Math.max(
     html.scrollHeight, html.offsetHeight, html.clientHeight,
-    body?.scrollHeight ?? 0, body?.offsetHeight ?? 0, body?.clientHeight ?? 0
+    body?.scrollHeight ?? 0, body?.offsetHeight ?? 0, body?.clientHeight ?? 0,
+    300
   )
+  // return html.scrollHeight
 }
 
+function appCalcHeight() {
+  const app = document.querySelector('#app')
+  return app?.scrollHeight ?? 0
+}
 
 // onMounted(() => {
 //   console.log('currentView: ', currentView);
@@ -33,34 +41,56 @@ function calcHeight() {
 //   }, 'http://localhost:5174')
 // })
 
-onMounted(async () => {
+onMounted( () => {
   // 必须确认自己确实在 iframe 里
   const inIframe = window.self !== window.top
   if (!inIframe) return
+  console.log('onMounted');
 
+  // const targetOrigin = 'http://localhost:5174' // 改成你的父页面 origin（协议+域名+端口）
+
+  // const post = () => {
+  //   parent.postMessage({ type: 'IFRAME_RESIZE', height: calcHeight() }, targetOrigin)
+  // }
+
+  // // 初次发送（等 DOM / 样式渲染完）
+  // await nextTick()
+  // post()
+
+  // // 观察尺寸变化（内容变动、图片加载后高度变化等）
+  // const ro = new ResizeObserver(() => post())
+  // ro.observe(document.documentElement)
+
+  // // 可选：图片加载也可能触发（保险）
+  // window.addEventListener('load', post)
+
+  // onBeforeUnmount(() => {
+  //    ro.disconnect()
+  //    window.removeEventListener('load', post)
+  //  })
+})
+
+window.onresize = function() {
+  const inIframe = window.self !== window.top
+  if (!inIframe) return
+  lastAppHeight.value = appCalcHeight()
+  // console.log('onresize');
+  // const targetOrigin = 'http://localhost:5174' // 改成你的父页面 origin（协议+域名+端口）
+  // console.log('appCalcHeight',appCalcHeight());
+  // const post = () => {
+  //   parent.postMessage({ type: 'IFRAME_RESIZE', height: calcHeight() }, targetOrigin)
+  // }
+  // post()
+}
+
+watch(lastAppHeight,(val,oldVal)=>{
+  console.log('lastAppHeight val: ', val);
   const targetOrigin = 'http://localhost:5174' // 改成你的父页面 origin（协议+域名+端口）
-
   const post = () => {
     parent.postMessage({ type: 'IFRAME_RESIZE', height: calcHeight() }, targetOrigin)
   }
-
-  // 初次发送（等 DOM / 样式渲染完）
-  await nextTick()
   post()
-
-  // 观察尺寸变化（内容变动、图片加载后高度变化等）
-  const ro = new ResizeObserver(() => post())
-  ro.observe(document.documentElement)
-
-  // 可选：图片加载也可能触发（保险）
-  window.addEventListener('load', post)
-
-  onBeforeUnmount(() => {
-     ro.disconnect()
-     window.removeEventListener('load', post)
-   })
-})
-
+},{immediate: true})
 </script>
 
 <template>
