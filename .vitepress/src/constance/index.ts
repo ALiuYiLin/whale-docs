@@ -1,0 +1,1 @@
+export const TAG_ORIGIN = 'http://localhost:5173'

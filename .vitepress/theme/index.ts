@@ -5,6 +5,8 @@ import './style.css'
 export default {
   Layout,
   enhanceApp({ app, router, siteData }) {
+    // 获取html元素
+  
   }
 } satisfies Theme
 

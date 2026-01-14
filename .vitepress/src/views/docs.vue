@@ -10,13 +10,17 @@ import '@/assets/styles/components/vp-code.css'
 import '@/assets/styles/components/vp-doc.css'
 import '@/assets/styles/components/vp-sponsor.css'
 import VPDocAsideOutline from '@/components/VPDocAsideOutline.vue'
+import { onMounted, ref } from 'vue'
 
-
+const inIframe = ref(false)
+onMounted(()=> {
+  inIframe.value = window.self !== window.top
+})
 </script>
 <template>
-  <div class="flex flex-row">
+  <div class="flex flex-row" v-show="!inIframe">
     <div class="max-w-[960px] content">
-      <Content class="vp-doc"></Content>
+        <Content class="vp-doc"></Content>
     </div>
     <div class="pl-[60px] relative hidden asider-container">
       <div class="w-[224px] fixed top-0 pt-[112px] h-screen">
@@ -24,6 +28,7 @@ import VPDocAsideOutline from '@/components/VPDocAsideOutline.vue'
       </div>
     </div>
   </div>
+  <Content class="vp-doc" v-show="inIframe"></Content>
 </template>
 
 <style scoped>
