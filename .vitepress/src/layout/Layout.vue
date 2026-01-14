@@ -6,10 +6,9 @@ import { useLayout } from '@/router'
 import { useSiderBar } from '@/composables/use-siderbar'
 import { computed, onMounted, nextTick, onBeforeUnmount, onUpdated, watch, ref } from 'vue'
 import { TAG_ORIGIN } from '@/constance'
-import { on } from 'events'
 const { currentView } = useLayout()
 const { currentSiderbarItem } = useSiderBar()
-const inIframe = computed(() => window.self !== window.top)
+const inIframe = ref(false)
 
 function calcHeight() {
   const html = document.documentElement
@@ -23,16 +22,17 @@ function calcHeight() {
 const post = () => {
   parent.postMessage({ type: 'IFRAME_RESIZE', height: calcHeight() }, TAG_ORIGIN)
 }
-
 onMounted(() => {
+  inIframe.value = window.self !== window.top
+  console.log('inIframe.value: ', inIframe.value);
   if (!inIframe) return
   post()
+  window.onresize = function () {
+    if (!inIframe) return
+    post()
+  }
 })
 
-window.onresize = function () {
-  if (!inIframe) return
-  post()
-}
 
 </script>
 
@@ -54,6 +54,7 @@ window.onresize = function () {
     </main>
   </div>
   <component :is="currentView" v-else></component>
+  
 </template>
 
 <style scoped>
